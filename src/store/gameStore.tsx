@@ -377,9 +377,33 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [regionData, resourceData] = await Promise.all([apiGet<Region[]>('/regions'), apiGet<Resources>('/resources')]);
     setRegions(regionData || []); setResources(resourceData || { coins: 0, ore: 0, wood: 0, food: 0 });
   };
-  const buyRegion = async (type: Region['type']) => { await apiPost('/regions/buy', { type }); await loadRegions(); notify('Регион куплен', 'Новый источник дохода добавлен', 'success'); };
-  const upgradeRegion = async (id: number) => { await apiPost('/regions/upgrade', { regionId: id }); await loadRegions(); notify('Регион улучшен', 'Доходность увеличена', 'success'); };
-  const collectRegions = async () => { const data = await apiPost<{ income: Resources }>('/regions/collect'); await loadRegions(); notify('Ресурсы собраны', `+${data.income.ore} руды · +${data.income.wood} дерева · +${data.income.food} еды`, 'success'); };
+  const buyRegion = async (type: Region['type']) => {
+    try {
+      await apiPost('/regions/buy', { type });
+      await loadRegions();
+      notify('Регион захвачен', 'Новый источник дохода добавлен', 'success');
+    } catch (error) {
+      notify('Не удалось захватить регион', error instanceof Error ? error.message : 'Попробуйте ещё раз', 'error');
+    }
+  };
+  const upgradeRegion = async (id: number) => {
+    try {
+      await apiPost('/regions/upgrade', { regionId: id });
+      await loadRegions();
+      notify('Регион улучшен', 'Доходность увеличена', 'success');
+    } catch (error) {
+      notify('Не удалось улучшить регион', error instanceof Error ? error.message : 'Попробуйте ещё раз', 'error');
+    }
+  };
+  const collectRegions = async () => {
+    try {
+      const data = await apiPost<{ income: Resources }>('/regions/collect');
+      await loadRegions();
+      notify('Ресурсы собраны', `+${data.income.ore} руды · +${data.income.wood} дерева · +${data.income.food} еды`, 'success');
+    } catch (error) {
+      notify('Не удалось собрать ресурсы', error instanceof Error ? error.message : 'Попробуйте ещё раз', 'error');
+    }
+  };
 
 
   const createClan = async (name: string, vkGroupId: string) => {
