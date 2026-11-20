@@ -65,6 +65,8 @@ interface GameState {
   createClan: (name: string, vkGroupId: string) => Promise<void>; joinClan: (clanId: string) => Promise<void>; claimIncome: () => Promise<void>;
   buyLimitCoins: () => void; buyLimitVotes: () => void; buyBoost: (type: any) => void; buyFrame: (frame: any) => Promise<void>;
   regions: Region[]; resources: Resources;
+  admin: { isAdmin: boolean; addCoins: (amount: number) => Promise<void> };
+
   loadRegions: () => Promise<void>; buyRegion: (type: Region['type']) => Promise<void>; upgradeRegion: (id: number) => Promise<void>; collectRegions: () => Promise<void>;
 
   buyCoinsForVotes: (coinsAmount: number, votesCost: number) => Promise<void>; openChest: (type: any) => Character | null; claimAdReward: () => Promise<void>;
@@ -93,6 +95,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [adCooldownEnd, setAdCooldownEnd] = useState(0);
   const [regions, setRegions] = useState<Region[]>([]);
   const [resources, setResources] = useState<Resources>({ coins: 0, ore: 0, wood: 0, food: 0 });
+
+  const [adminStatus, setAdminStatus] = useState(false);
 
   const [playerAdViews, setPlayerAdViews] = useState(0);
   const [clanData, setClanData] = useState<any>(null);
@@ -167,6 +171,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (marketError) {
           console.error('Ошибка загрузки рынка', marketError);
         }
+
+        try {
+          const adminData = await apiGet<{ isAdmin: boolean }>('/admin/status');
+          setAdminStatus(adminData.isAdmin);
+        } catch {
+          setAdminStatus(false);
+        }
+
 
         await loadRegions();
 
@@ -373,7 +385,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const releaseCharacter = (charId: string) => setPlayer({ ...player, characters: player.characters.filter((c) => c.id !== charId) });
   const upgradeCharacter = (charId: string) => { void charId; notify('В разработке', 'Прокачка скоро', 'info'); };
 
+  const addAdminCoins = async (amount: number) => {
+    try {
+      const data = await apiPost<{ coins: number }>('/admin/add-coins', { amount });
+      setPlayer((prev) => ({ ...prev, coins: data.coins }));
+      notify('Баланс пополнен', `+${amount.toLocaleString('ru-RU')} 💰`, 'success');
+    } catch (error) {
+      notify('Ошибка администратора', error instanceof Error ? error.message : 'Не удалось пополнить баланс', 'error');
+    }
+  };
   const loadRegions = async () => {
+
     const [regionData, resourceData] = await Promise.all([apiGet<Region[]>('/regions'), apiGet<Resources>('/resources')]);
     setRegions(regionData || []); setResources(resourceData || { coins: 0, ore: 0, wood: 0, food: 0 });
   };
@@ -509,6 +531,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <Ctx.Provider value={{
       player, lots, clans,
       regions, resources, loadRegions, buyRegion, upgradeRegion, collectRegions,
+      admin: { isAdmin: adminStatus, addCoins: addAdminCoins },
+
       buyLot, sellCharacter, giveAwayCharacter, buyoutSelf, releaseCharacter, upgradeCharacter,
       createClan, joinClan, claimIncome,
       buyLimitCoins, buyLimitVotes, buyBoost, buyFrame, buyCoinsForVotes, openChest, claimAdReward,

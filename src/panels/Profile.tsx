@@ -42,6 +42,8 @@ export function Profile({ go }: { go: (p: string) => void }) {
     releaseCharacter,
     sellCharacter,
     giveAwayCharacter,
+    admin,
+
   } = useGame();
 
   const nextCareer = CAREER_LEVELS[player.careerLevel] || null;
@@ -94,7 +96,20 @@ export function Profile({ go }: { go: (p: string) => void }) {
           </div>
         </div>
 
+        {admin.isAdmin && (
+          <section className="profile-card admin-tools-card">
+            <div className="profile-card-heading"><span>🛠️ Администрирование</span><b>Тестовый баланс</b></div>
+            <div className="admin-tools-buttons">
+              {[100000, 1000000, 10000000, 100000000].map((amount) => (
+                <button key={amount} type="button" className="btn-primary" onClick={() => void admin.addCoins(amount)}>+{amount.toLocaleString('ru-RU')} 💰</button>
+              ))}
+            </div>
+          </section>
+        )}
         <JudgmentTimer />
+
+
+
 
         {/* СТАТИСТИКА */}
         <div className="profile-stats-grid" style={{ marginTop: 16 }}>

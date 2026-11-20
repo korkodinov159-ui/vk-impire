@@ -6,8 +6,16 @@ const path = require('path');
 
 const sqlite3 = require('sqlite3').verbose();
 
+const adminIds = new Set(
+  String(process.env.VK_ADMIN_IDS || '')
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean),
+);
 const configuredDbPath = process.env.DB_PATH || path.join(__dirname, 'game.db');
 fs.mkdirSync(path.dirname(configuredDbPath), { recursive: true });
+const isAdmin = (vkId) => adminIds.has(String(vkId));
+
 
 const app = express();
 const allowedOrigins = [
@@ -344,6 +352,19 @@ const econBasePrice = (income) => Math.max(100, Math.floor(Math.pow(Math.max(1, 
 const econPrice = (ch) => Math.floor(econBasePrice(ch.income) * Math.pow(2.2, Math.min(ch.resaleCount || 0, 30)) * (ch.boughtBySelf ? 2.2 : 1));
 const econNextIncome = (income) => Math.min(500, Math.max(1, Math.ceil(income * 1.3)));
 const econUser = (req) => String(req.body?.vk_user_id || req.query?.vk_user_id || '');
+app.post('/api/admin/add-coins', (req, res) => {
+  const vkId = econUser(req);
+  const amount = Number(req.body?.amount);
+  if (!isAdmin(vkId)) return res.status(403).json({ error: 'Доступ только для администратора' });
+  if (!Number.isSafeInteger(amount) || amount <= 0 || amount > 1_000_000_000_000) return res.status(400).json({ error: 'Некорректная сумма' });
+  db.run(`UPDATE players SET coins=coins+? WHERE vk_id=?`, [amount, vkId], function updateAdminBalance(updateErr) {
+    if (updateErr) return res.status(500).json({ error: updateErr.message });
+    if (this.changes === 0) return res.status(404).json({ error: 'Игрок не найден' });
+    db.get(`SELECT coins FROM players WHERE vk_id=?`, [vkId], (getErr, row) => getErr ? res.status(500).json({ error: getErr.message }) : res.json({ success: true, coins: row.coins, added: amount }));
+  });
+});
+
+
 
 
 app.post('/api/collect', (req, res) => {
