@@ -70,17 +70,17 @@ export function Market() {
 
   return (
     <Panel id="market" className="custom-app-bg">
-        <PanelHeader style={{ background: 'transparent' }}>Р С‹РЅРѕРє</PanelHeader>
+        <PanelHeader style={{ background: 'transparent' }}>Рынок</PanelHeader>
 
       <Div className="page-shell market-page" style={{ padding: '0 16px', paddingBottom: 100 }}>
         <header className="market-hero">
-          <div className="market-title-row"><h1>Р С‹РЅРѕРє</h1><span className="market-help" aria-label="РЎРїСЂР°РІРєР° Рѕ СЂС‹РЅРєРµ">?</span></div>
-          <div className="market-status">РћРўРљР Р«Рў В· 24/7</div>
+          <div className="market-title-row"><h1>Рынок</h1><span className="market-help" aria-label="Справка о рынке">?</span></div>
+          <div className="market-status">Открыт · 24/7</div>
           <div className="market-balance"><Icon24Coins aria-hidden="true" /><strong>{player.coins.toLocaleString('ru-RU')}</strong><span className="market-plus" aria-hidden="true">+</span></div>
         </header>
-        <div className="market-tabs" role="tablist" aria-label="Р¤РёР»СЊС‚СЂ РїСЂРѕРґР°РІС†РѕРІ">
-          <button type="button" role="tab" aria-selected="true" className="market-tab market-tab-active">Р’СЃРµ</button>
-          <button type="button" role="tab" aria-selected="false" className="market-tab" disabled>Р”СЂСѓР·СЊСЏ</button>
+        <div className="market-tabs" role="tablist" aria-label="Фильтр продавцов">
+          <button type="button" role="tab" aria-selected="true" className="market-tab market-tab-active">Все</button>
+          <button type="button" role="tab" aria-selected="false" className="market-tab" disabled>Друзья</button>
         </div>
 
         {isJudgmentDay && (
@@ -89,7 +89,7 @@ export function Market() {
             borderRadius: 12, padding: 12, marginBottom: 16, textAlign: 'center',
             color: '#ef4444', fontWeight: 600,
           }}>
-            рџ”Ґ РЎСѓРґРЅС‹Р№ РґРµРЅСЊ! Р’СЃРµ РїРѕРґРґР°РЅРЅС‹Рµ СЃС‚РѕСЏС‚ РІ 2 СЂР°Р·Р° РґРµС€РµРІР»Рµ!
+            🔥 Судный день! Все подданные стоят в 2 раза дешевле!
           </div>
         )}
 
@@ -99,23 +99,23 @@ export function Market() {
             style={{ padding: 10, fontSize: 12, marginTop: 0, background: sortBy === 'asc' ? '#5a7af5' : '#2a2a35', boxShadow: 'none' }}
             onClick={() => { setSortBy('asc'); setVisibleCount(PAGE_SIZE); }}
           >
-            в†‘ Р”РѕС…РѕРґ: РјРµРЅСЊС€Рµ в†’ Р±РѕР»СЊС€Рµ
+            ↑ Доход: меньше → больше
           </button>
           <button
             className="btn-primary"
             style={{ padding: 10, fontSize: 12, marginTop: 0, background: sortBy === 'desc' ? '#5a7af5' : '#2a2a35', boxShadow: 'none' }}
             onClick={() => { setSortBy('desc'); setVisibleCount(PAGE_SIZE); }}
           >
-            в†“ Р”РѕС…РѕРґ: Р±РѕР»СЊС€Рµ в†’ РјРµРЅСЊС€Рµ
+            ↓ Доход: больше → меньше
           </button>
         </div>
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-          <Input placeholder="Р¦РµРЅР° РѕС‚" type="number" value={minPrice}
+          <Input placeholder="Цена от" type="number" value={minPrice}
             onChange={(e) => { setMinPrice(e.target.value); setVisibleCount(PAGE_SIZE); }}
             style={{ background: '#1a1a21', borderRadius: 12, border: 'none', color: '#fff' }}
             className="custom-input" />
-          <Input placeholder="Р¦РµРЅР° РґРѕ" type="number" value={maxPrice}
+          <Input placeholder="Цена до" type="number" value={maxPrice}
             onChange={(e) => { setMaxPrice(e.target.value); setVisibleCount(PAGE_SIZE); }}
             style={{ background: '#1a1a21', borderRadius: 12, border: 'none', color: '#fff' }}
             className="custom-input" />
@@ -133,11 +133,11 @@ export function Market() {
                   <div style={{ marginLeft: 12, minWidth: 0 }}>
                     <div className="text-value" style={{ fontSize: 15, fontWeight: 600, color: '#fff' }}>{lot.character.name}</div>
                     <div style={{ color: '#4ade80', fontSize: 13, fontWeight: 600, marginTop: 2 }}>
-                      +{lot.character.income} рџ’° / С‡ в†’ РїРѕСЃР»Рµ РїРѕРєСѓРїРєРё +{Math.min(500, Math.ceil(lot.character.income * 1.3))} рџ’° / С‡
+                      +{lot.character.income} 💰 / ч → после покупки +{Math.min(500, Math.ceil(lot.character.income * 1.3))} 💰 / ч
                     </div>
                     <div style={{ fontSize: 10, color: '#888', marginTop: 2 }}>
-                      {resaleCount > 0 ? `рџ”„ РїРµСЂРµРїСЂРѕРґР°Р¶Р° Г—${resaleCount}` : 'рџ†• РЅРѕРІС‹Р№'}
-                      {lot.character.boughtBySelf ? ' вЂў РІС‹РєСѓРїР»РµРЅ' : ''}
+                      {resaleCount > 0 ? `🔄 Перепродажа ×${resaleCount}` : '🆕 Новый'}
+                      {lot.character.boughtBySelf ? ' • Выкуплен' : ''}
                     </div>
                   </div>
                 </div>
@@ -154,7 +154,7 @@ export function Market() {
                   }}
                 >
                   {isCooldown ? (
-                    <span style={{ color: '#888', fontSize: 13, fontWeight: 700 }}>Р–РґРёС‚Рµ {cooldownSec}СЃ</span>
+                    <span style={{ color: '#888', fontSize: 13, fontWeight: 700 }}>Ждите {cooldownSec} с</span>
                   ) : (
                     <>
                       <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#5a7af5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -169,13 +169,13 @@ export function Market() {
           })}
 
           {filteredLots.length === 0 && (
-            <div style={{ textAlign: 'center', color: '#888', marginTop: 20 }}>РќРµС‚ Р»РѕС‚РѕРІ РїРѕ Р·Р°РґР°РЅРЅС‹Рј РєСЂРёС‚РµСЂРёСЏРј</div>
+            <div style={{ textAlign: 'center', color: '#888', marginTop: 20 }}>Нет лотов по заданным критериям</div>
           )}
 
           {visibleCount < filteredLots.length && (
             <button className="btn-primary" style={{ marginTop: 12, background: '#2a2a35', boxShadow: 'none' }}
               onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}>
-              РџРѕРєР°Р·Р°С‚СЊ РµС‰С‘ {PAGE_SIZE} (Р’СЃРµРіРѕ: {filteredLots.length})
+              Показать ещё {PAGE_SIZE} (Всего: {filteredLots.length})
             </button>
           )}
         </div>

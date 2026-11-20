@@ -182,25 +182,29 @@ db.run(`ALTER TABLE market_lots ADD COLUMN status TEXT DEFAULT 'active'`, () => 
 
 const ensureSystemMarketLots = () => {
   db.get(`SELECT COUNT(*) AS count FROM market_lots WHERE seller_vk_id='system' AND (status='active' OR status IS NULL OR status='')`, [], (countErr, row) => {
-    if (countErr || Number(row?.count) > 0) return;
+    if (countErr) return;
+    const activeCount = Number(row?.count) || 0;
+    const missingCount = Math.max(0, 100 - activeCount);
+    if (missingCount === 0) return;
 
-    const names = ['Екатерина', 'Зоя', 'Алла', 'Елена', 'Мария', 'София'];
-    const stmt = db.prepare(`INSERT OR IGNORE INTO market_lots (id, seller_vk_id, character, created_at, status) VALUES (?, ?, ?, ?, 'active')`);
-    for (let i = 0; i < 100; i += 1) {
-      const income = Math.min(500, Math.max(1, Math.floor(5 * Math.pow(1.3, i % 18))));
+    const names = ['Екатерина', 'Зоя', 'Алла', 'Елена', 'Мария', 'София', 'Анастасия', 'Виктория'];
+    const batchId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const stmt = db.prepare(`INSERT INTO market_lots (id, seller_vk_id, character, created_at, status) VALUES (?, ?, ?, ?, 'active')`);
+    for (let i = 0; i < missingCount; i += 1) {
+      const income = Math.min(500, Math.max(1, Math.floor(5 * Math.pow(1.3, (activeCount + i) % 18))));
       const character = {
-        id: `system-character-${i}`,
-        name: names[i % names.length],
-        avatar: `https://api.dicebear.com/9.x/personas/svg?seed=system-character-${i}`,
+        id: `system-character-${batchId}-${i}`,
+        name: names[(activeCount + i) % names.length],
+        avatar: `https://api.dicebear.com/9.x/personas/svg?seed=system-character-${batchId}-${i}`,
         type: 'bot',
-        rarity: i > 80 ? 'Rare' : 'Common',
+        rarity: i % 10 === 0 ? 'Rare' : 'Common',
         level: 1,
         basePower: income * 10,
         income,
         resaleCount: 0,
         boughtBySelf: false,
       };
-      stmt.run(`system-lot-${i}`, 'system', JSON.stringify(character), Date.now());
+      stmt.run(`system-lot-${batchId}-${i}`, 'system', JSON.stringify(character), Date.now());
     }
     stmt.finalize();
   });
@@ -400,7 +404,7 @@ app.post('/api/character/buy', (req, res) => {
         db.run('BEGIN IMMEDIATE TRANSACTION');
         db.run(`UPDATE players SET coins=coins-?, characters=? WHERE vk_id=?`, [price, JSON.stringify([...chars, ch]), vkId]);
         if (lot.seller_vk_id !== 'system') db.run(`UPDATE players SET coins=coins+? WHERE vk_id=?`, [Math.floor(econBasePrice(JSON.parse(lot.character).income) * 0.5), lot.seller_vk_id]);
-        db.run(`UPDATE market_lots SET status='sold' WHERE id=?`, [lotId], (updateErr) => updateErr ? db.run('ROLLBACK', () => res.status(500).json({ error: updateErr.message })) : db.run('COMMIT', () => res.json({ success: true, paid: price, tax: 0, character: ch, coins: player.coins - price })));
+        db.run(`UPDATE market_lots SET status='sold' WHERE id=?`, [lotId], (updateErr) => updateErr ? db.run('ROLLBACK', () => res.status(500).json({ error: updateErr.message })) : db.run('COMMIT', () => { ensureSystemMarketLots(); res.json({ success: true, paid: price, tax: 0, character: ch, coins: player.coins - price }); }));
       });
     });
   });
