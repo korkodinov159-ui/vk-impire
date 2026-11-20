@@ -1,4 +1,4 @@
-﻿import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 
 
 import { Icon24Coins } from '@vkontakte/icons';
@@ -34,7 +34,7 @@ export function Market() {
   );
 
   const filteredLots = useMemo(() => {
-    // Р РЋР С”РЎР‚РЎвЂ№Р Р†Р В°Р ВµР С Р В»Р С•РЎвЂљРЎвЂ№ РЎРѓ РЎвЂ Р ВµР Р…Р С•Р в„– >= 20M (Р С•Р В±РЎвЂ°Р С‘Р в„– РЎРѓР С—Р С‘РЎРѓР С•Р С”)
+    // Фильтруем лоты с ценой ниже порога отображения.
     let result = lots.filter((l) => getLotPrice(l) < MARKET_HIDE_THRESHOLD);
 
     if (minPrice) {

@@ -56,7 +56,7 @@ function makeChestCharacter(minIncome: number, maxIncome: number): Character {
 interface RefDbEntry { referrer: string; ref: string; name: string; avatar: string; totalEarned: number; joinedAt: number; bonusPaid: number; }
 function loadRefDb(): RefDbEntry[] { try { return JSON.parse(localStorage.getItem('ref_db_v1') || '[]'); } catch { return []; } }
 function saveRefDb(db: RefDbEntry[]) { localStorage.setItem('ref_db_v1', JSON.stringify(db)); }
-function parseRefFromUrl(): string | null { try { const ref = new URLSearchParams(window.location.search).get('ref'); if (ref && /^\d+$/.test(ref)) return ref; } catch {} return null; }
+function parseRefFromUrl(): string | null { try { const ref = new URLSearchParams(window.location.search).get('ref'); if (ref && /^\d+$/.test(ref)) return ref; } catch { return null; } return null; }
 
 interface GameState {
   player: Player; lots: MarketLot[]; clans: Clan[];
@@ -176,7 +176,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         if (invitedBy) {
-          try { const url = new URL(window.location.href); url.searchParams.delete('ref'); window.history.replaceState({}, '', url.toString()); } catch {}
+          try { const url = new URL(window.location.href); url.searchParams.delete('ref'); window.history.replaceState({}, '', url.toString()); } catch { /* URL may be unavailable outside a browser. */ }
         }
       } catch (e) {
         console.error("Ошибка загрузки профиля", e);
@@ -196,7 +196,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const cData = await apiGet(`/clan/${player.clanId}`);
           setClanData(cData);
         }
-      } catch {}
+      } catch {
+        // Синхронизация выполняется повторно следующим таймером.
+      }
     }, 5000);
     return () => { if (syncTimerRef.current) clearTimeout(syncTimerRef.current); };
   }, [player]);
@@ -369,7 +371,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const releaseCharacter = (charId: string) => setPlayer({ ...player, characters: player.characters.filter((c) => c.id !== charId) });
-  const upgradeCharacter = (_charId: string) => notify('В разработке', 'Прокачка скоро', 'info');
+  const upgradeCharacter = (charId: string) => { void charId; notify('В разработке', 'Прокачка скоро', 'info'); };
 
   const loadRegions = async () => {
     const [regionData, resourceData] = await Promise.all([apiGet<Region[]>('/regions'), apiGet<Resources>('/resources')]);
