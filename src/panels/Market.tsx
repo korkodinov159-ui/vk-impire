@@ -1,4 +1,4 @@
-﻿import { useState, useMemo, useCallback } from 'react';
+﻿import { useState, useMemo, useCallback, useEffect } from 'react';
 
 
 import { Icon24Coins } from '@vkontakte/icons';
@@ -7,6 +7,8 @@ import { useGame } from '../store/gameStore';
 import { useProfile } from '../context/ProfileContext';
 
 import { apiGet } from '../api/client';
+import type { MarketLot } from '../types';
+
 import { calcCurrentPrice, MARKET_HIDE_THRESHOLD, isJudgmentDayNow } from '../config';
 
 const PAGE_SIZE = 50;
