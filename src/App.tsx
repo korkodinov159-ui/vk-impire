@@ -23,7 +23,7 @@ import { Regions } from './panels/Regions';
 import { ClanDetails } from './panels/ClanDetails';
 import { Clan } from './panels/Clan';
 
-import { Icon24SartOutline, Icon24Market, Icon24CupOutline, Icon24User, Icon24CubeBoxOutline } from '@vkontakte/icons';
+import { Icon24SartOutline, Icon24Market, Icon24CupOutline, Icon24User, Icon24CubeBoxOutline, Icon24LocationMapOutline } from '@vkontakte/icons';
 
 // РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРёР№ РїРѕРєР°Р· РµР¶РµРґРЅРµРІРЅРѕР№ РЅР°РіСЂР°РґС‹ РїСЂРё Р·Р°С…РѕРґРµ
 function DailyAutoOpener() {
@@ -82,6 +82,8 @@ export function App() {
                 <button type="button" className={`tab-item ${activePanel === 'profile' ? 'active' : ''}`} onClick={() => setActivePanel('profile')}><span className="tab-icon" aria-hidden="true"><Icon24User /></span><span>Профиль</span></button>
                 <button type="button" className={`tab-item ${activePanel === 'top' || activePanel === 'clan_details' || activePanel === 'clan' ? 'active' : ''}`} onClick={() => setActivePanel('top')}><span className="tab-icon" aria-hidden="true"><Icon24CupOutline /></span><span>Рейтинг</span></button>
                 <button type="button" className={`tab-item ${activePanel === 'auction' ? 'active' : ''}`} onClick={() => setActivePanel('auction')}><span className="tab-icon" aria-hidden="true"><Icon24CubeBoxOutline /></span><span>Аукцион</span></button>
+                <button type="button" className={`tab-item ${activePanel === 'regions' ? 'active' : ''}`} onClick={() => setActivePanel('regions')}><span className="tab-icon" aria-hidden="true"><Icon24LocationMapOutline /></span><span>Регионы</span></button>
+
                 <button type="button" className={`tab-item ${activePanel === 'market' ? 'active' : ''}`} onClick={() => setActivePanel('market')}><span className="tab-icon" aria-hidden="true"><Icon24SartOutline /></span><span>Рынок</span></button>
                 <button type="button" className={`tab-item ${activePanel === 'shop' ? 'active' : ''}`} onClick={() => setActivePanel('shop')}><span className="tab-icon" aria-hidden="true"><Icon24Market /></span><span>Магазин</span></button>
               </nav>
